@@ -148,3 +148,62 @@ register.simple_tag(takes_context=True)(url)
 register.simple_tag(takes_context=True)(config)
 register.simple_tag(takes_context=True)(current_page)
 register.simple_tag(takes_context=True)(if_current_page)
+
+# ============================================================================ #
+
+import pprint
+import random
+
+@register.filter(is_safe=True)
+def get(mapping, key):
+    return mapping.get(key, '')
+
+@register.filter(is_safe=True)
+def get_verbose(mapping, key):
+    print("-----------------------------")
+    print("key=%(key)s, mapping:" % vars())
+    pprint.pprint(mapping)
+    print("result:")
+    pprint.pprint(mapping.get(key, ''))
+    print("-----------------------------")
+    return mapping.get(key, '')
+
+# ---------------------------------------------------------------------------- #
+
+RANDOM_POSTS_POPULATION = None
+
+def random_posts(context, pages, how_many=3):
+    
+    global RANDOM_POSTS_POPULATION
+    if RANDOM_POSTS_POPULATION == None:
+        RANDOM_POSTS_POPULATION = {k:v for k,v in pages.items() if v['type'] == 'post'}
+
+    current_page = context['PAGE']
+    
+    to_select = dict(RANDOM_POSTS_POPULATION)
+    del to_select[current_page['path']]
+    
+    selected = []
+    n = 0
+    while n < how_many and len(to_select) > 0:
+        page_key = random.choice(to_select.keys())
+        selected.append(to_select[page_key])
+        del to_select[page_key]
+    
+    # new_context = dict(context)
+    # new_context['random_posts': selected]
+    return {
+        '__CACTUS_SITE__': context['__CACTUS_SITE__'],
+        '__CACTUS_CURRENT_PAGE__': context['__CACTUS_CURRENT_PAGE__'],
+        'random_posts': selected
+    }
+
+register.inclusion_tag('random_posts.html', takes_context=True)(random_posts)
+
+
+def pippo(context, key):
+    
+    return "my-%s" % key
+
+register.simple_tag(takes_context=True)(pippo)
+register.filter()

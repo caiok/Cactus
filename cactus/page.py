@@ -106,6 +106,7 @@ class Page(PageCompatibilityLayer, ResourceURLHelperMixin):
         context, data = self.site.plugin_manager.preBuildPage(
             self.site, self, context, data)
 
+        logger.debug("Rendering page: %s", self.path)
         return Template(data).render(context)
 
     def build(self):
