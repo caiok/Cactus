@@ -4,19 +4,20 @@ import getpass
 import keyring
 
 is_desktop_app = os.environ.get("DESKTOPAPP", None) not in ["", None]
+is_pass_from_env = os.environ.get("CACTUS_PASS_FROM_ENV", None) not in ["", None]
 
 def get_password(service, account):
 
     # Because we cannot use keychain from a sandboxed app environment we check if the password
     # was passed by the app into the env.
-    if is_desktop_app:
+    if is_desktop_app or is_pass_from_env:
         return os.environ.get("SECRET_KEY", None)
 
     return keyring.get_password(service, account)
 
 def set_password(service, account, password):
 
-    if is_desktop_app:
+    if is_desktop_app or is_pass_from_env:
         return
 
     keyring.set_password(service, account, password)
