@@ -181,7 +181,8 @@ def random_posts(context, pages, how_many=3):
     current_page = context['PAGE']
     
     to_select = dict(RANDOM_POSTS_POPULATION)
-    del to_select[current_page['path']]
+    if current_page['path'] in to_select:
+        del to_select[current_page['path']]
     
     selected = []
     n = 0
